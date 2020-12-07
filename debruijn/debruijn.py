@@ -46,7 +46,6 @@ def isfile(path):
         raise argparse.ArgumentTypeError(msg)
     return path
 
-
 def get_arguments():
     """Retrieves the arguments of the program.
       Returns: An object that contains the arguments
@@ -64,29 +63,60 @@ def get_arguments():
                         help="Output contigs in fasta file")
     return parser.parse_args()
 
-
 def read_fastq(fastq_file):
-    pass
 
+    if (isfile(fastq_file)):
+        with open(fastq_file, "r") as myf:
+            for line in myf:
+                yield next(myf).strip()
+                next(myf)
+                next(myf)
 
 def cut_kmer(read, kmer_size):
-    pass
-
+    
+    for i, chaine in enumerate(read):
+        if(len(read)-i >= kmer_size):  
+            seq = read[i:i+kmer_size]
+            yield seq
 
 def build_kmer_dict(fastq_file, kmer_size):
-    pass
+    dictionnaire = dict()
+    list_ =[]
+    list_distinct = []
 
+    for a in read_fastq(fastq_file):
+        for b in cut_kmer(a, kmer_size):
+            list_.append(b)
+
+    for item in list_: 
+        if item not in list_distinct: 
+            list_distinct.append(item) 
+
+    for i in list_distinct:
+        count = 0
+        for item1 in list_: 
+            if item1==i: 
+                count = count + 1
+        dictionnaire[i] = count 
+
+    return dictionnaire
 
 def build_graph(kmer_dict):
-    pass
 
-
+    graph = nx.DiGraph()
+    for key, value in kmer_dict.items():
+        sequen = key
+        n = len(sequen)
+        new_sequen1 = sequen[0:n-1]
+        new_sequen2 = sequen[1:n]
+        graph.add_edge(new_sequen1, new_sequen2, weight = value)
+    return graph
+  
 def remove_paths(graph, path_list, delete_entry_node, delete_sink_node):
     pass
 
 def std(data):
     pass
-
 
 def select_best_path(graph, path_list, path_length, weight_avg_list, 
                      delete_entry_node=False, delete_sink_node=False):
@@ -128,6 +158,18 @@ def main():
     """
     # Get arguments
     args = get_arguments()
+
+    ######### fuction read_fastq #############
+    #fastq_file = '../data/eva71_two_reads.fq'
+    #read_fastq(fastq_file)
+    #for a in read_fastq(fastq_file): print(a)
+
+    ########## function cut_kmer ###############
+    #for a in cut_kmer('AGGYUUKL', 3): print(a)
+
+    ########## function build_kmer_dict ###############
+    #fastq_file = '../data/eva71_two_reads.fq'
+    #print(build_kmer_dict(fastq_file, 3))
 
 if __name__ == '__main__':
     main()
