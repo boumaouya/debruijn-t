@@ -73,7 +73,7 @@ def read_fastq(fastq_file):
                 next(myf)
 
 def cut_kmer(read, kmer_size):
-    
+
     for i, chaine in enumerate(read):
         if(len(read)-i >= kmer_size):  
             seq = read[i:i+kmer_size]
@@ -138,17 +138,50 @@ def solve_out_tips(graph, ending_nodes):
     pass
 
 def get_starting_nodes(graph):
-    pass
+
+    nodes = []
+    for node in graph.nodes():
+        pred = graph.predecessors(node)
+        if len(list(pred))==0:
+            nodes.append(node)
+
+    return nodes
 
 def get_sink_nodes(graph):
-    pass
+    nodes = []
+    for node in graph.nodes():
+        pred = graph.successors(node)
+        if len(list(pred))==0:
+            nodes.append(node)
+
+    return nodes
 
 def get_contigs(graph, starting_nodes, ending_nodes):
-    pass
+    contigs = []
+    for a in starting_nodes:
+        for b in ending_nodes:
+            list_paths = list(nx.all_simple_paths(graph,a,b))
+
+            for list_ in list_paths:
+                for k, l in enumerate(list_):
+                    if k==0: cont = list_[k]
+                    else:
+                        cont = cont + l[len(l)-1]
+                contigs.append((cont,len(cont)))
+    return contigs
 
 def save_contigs(contigs_list, output_file):
-    pass
+        
+    def fill(text, width=80):
+        """Split text with a line return to respect fasta format"""
+        return os.linesep.join(text[i:i+width] for i in range(0, len(text), width))
+    
+    with open(output_file, "wt") as f:
+        for k,contigs in enumerate(contigs_list):
+            f.write(">contig_" + str(k) + " len=" + str(contigs[1]) + "\n" + fill(contigs[0], width=80) + "\n")
+            k = k + 1
 
+    
 #==============================================================
 # Main program
 #==============================================================
